@@ -12,7 +12,7 @@ class UserInfo
   # @param username [String]
   def initialize(username)
     @username = username
-    @pesters_left = 1
+    @pesters_left = 2
   end
 end
 
@@ -42,10 +42,14 @@ class ReplyingBot < Ebooks::Bot
   end
 
   def on_startup
+    load_model!
+
     # Tweet every half hour with an 80% chance
     scheduler.cron '*/30 * * * *' do      
       if rand < 0.8
         tweet(model.make_statement)
+      else
+        log "Not tweeting this time"
       end
     end
 
@@ -164,6 +168,13 @@ class ReplyingBot < Ebooks::Bot
     log "Loading model #{model_path}"
     @model = Ebooks::Model.load(model_path)
   end
+
+  # Logs info to stdout in the context of this bot
+  def log(*args)
+    timestamp = "[" + Time.now.inspect + "] "
+    STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
+    STDOUT.flush
+  end  
 
 end
 
