@@ -46,11 +46,13 @@ class ReplyingBot < Ebooks::Bot
     scheduler.cron '*/30 * * * *' do      
       if rand < 0.8
         tweet(model.make_statement)
+      end
     end
 
     # Reload model every 24h (at 5 past midnight)
     scheduler.cron '5 0 * * *' do  
       load_model!
+    end
   end
 
 
