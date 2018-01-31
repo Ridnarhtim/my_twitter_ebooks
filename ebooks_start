@@ -1,0 +1,2 @@
+#!/bin/bash
+ebooks start > ~/logs/ebooks.log 2>&1
