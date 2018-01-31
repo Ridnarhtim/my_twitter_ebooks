@@ -1,0 +1,3 @@
+Gemfile.lock
+corpus/*.json
+model/*.model
