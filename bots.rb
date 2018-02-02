@@ -53,8 +53,8 @@ class ReplyingBot < Ebooks::Bot
       end
     end
 
-    # Reload model every 24h (at 5 past midnight)
-    scheduler.cron '5 0 * * *' do  
+    # Reload model every 24h (at 5 minutes past 2am)
+    scheduler.cron '5 2 * * *' do  
       load_model!
     end
   end
