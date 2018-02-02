@@ -82,7 +82,7 @@ class ReplyingBot < Ebooks::Bot
   # Reply to a mention
   def on_mention(tweet)
     # Become more inclined to pester a user when they talk to us
-    userinfo(tweet.user.screen_name).pesters_left += 
+    userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
       reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
     end
@@ -160,6 +160,13 @@ class ReplyingBot < Ebooks::Bot
     end
   end
 
+  # Logs info to stdout in the context of this bot
+  def log(*args)
+    timestamp = "[" + Time.now.inspect + "] "
+    STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
+    STDOUT.flush
+  end
+
   #load the model from file
   private
   def load_model!
@@ -168,13 +175,6 @@ class ReplyingBot < Ebooks::Bot
     log "Loading model #{model_path}"
     @model = Ebooks::Model.load(model_path)
   end
-
-  # Logs info to stdout in the context of this bot
-  def log(*args)
-    timestamp = "[" + Time.now.inspect + "] "
-    STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
-    STDOUT.flush
-  end  
 
 end
 
