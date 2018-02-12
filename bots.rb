@@ -22,6 +22,8 @@ def top20;  @top20  ||= model.keywords.take(20); end
 #Standard replying ebooks bot
 class ReplyingBot < Ebooks::Bot
   
+  FILE_FORMATS = "{jpg,png,jpeg}"
+
   #The originating user
   attr_accessor :original, :model, :model_path
 
@@ -46,7 +48,9 @@ class ReplyingBot < Ebooks::Bot
 
     # Tweet every hour with an 80% chance
     scheduler.cron '0 * * * *' do      
-      if rand < 0.8
+      if rand < 0.05
+        tweet_a_picture()
+      elsif rand < 0.8
         tweet(model.make_statement)
       else
         log "Not tweeting this time"
@@ -148,7 +152,7 @@ class ReplyingBot < Ebooks::Bot
       text = ""
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape ev.user.screen_name}/i)
 
-      images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{jpg,png,jpeg}")
+      images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
       pic = images.sample
 
       log "Replying to @#{ev.user.screen_name} with:  #{text.inspect} - #{pic}"
@@ -158,6 +162,12 @@ class ReplyingBot < Ebooks::Bot
     else
       log "Don't know how to reply to a #{ev.class}"
     end
+  end
+
+  def tweet_a_picture
+    images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "**/*.{#{FILE_FORMATS}}")
+    pic = images.sample  
+    pictweet("",pic)
   end
 
   # Find information we've collected about a user
