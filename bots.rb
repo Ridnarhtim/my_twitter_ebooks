@@ -84,7 +84,11 @@ class ReplyingBot < Ebooks::Bot
     # Become more inclined to pester a user when they talk to us
     userinfo(tweet.user.screen_name).pesters_left += 
     delay do
-      reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
+      if rand < 0.2
+        reply_with_image(tweet)
+      else
+        reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
+      end
     end
   end
 
@@ -129,6 +133,32 @@ class ReplyingBot < Ebooks::Bot
 
 
   #HELPERS
+
+  def reply_with_image(ev, opts={})
+    opts = opts.clone
+
+    if ev.is_a? Twitter::Tweet
+      meta = meta(ev)
+
+      if conversation(ev).is_bot?(ev.user.screen_name)
+        log "Not replying to suspected bot @#{ev.user.screen_name}"
+        return false
+      end
+
+      text = ""
+      text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape ev.user.screen_name}/i)
+
+      images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{jpg,png,jpeg}")
+      pic = images.sample
+
+      log "Replying to @#{ev.user.screen_name} with:  #{text.inspect} - #{pic}"
+      tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: ev.id))
+      conversation(tweet).add(tweet)
+      tweet
+    else
+      log "Don't know how to reply to a #{ev.class}"
+    end
+  end
 
   # Find information we've collected about a user
   # @param username [String]
