@@ -44,8 +44,8 @@ class ReplyingBot < Ebooks::Bot
   def on_startup
     load_model!
 
-    # Tweet every half hour with an 80% chance
-    scheduler.cron '*/30 * * * *' do      
+    # Tweet every hour with an 80% chance
+    scheduler.cron '0 * * * *' do      
       if rand < 0.8
         tweet(model.make_statement)
       else
@@ -84,7 +84,7 @@ class ReplyingBot < Ebooks::Bot
     # Become more inclined to pester a user when they talk to us
     userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
-      if rand < 0.2
+      if rand < 0.4
         reply_with_image(tweet)
       else
         reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
