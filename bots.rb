@@ -84,7 +84,7 @@ class ReplyingBot < Ebooks::Bot
     # Become more inclined to pester a user when they talk to us
     userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
-      if rand < 0.4
+      if rand < 0.25
         reply_with_image(tweet)
       else
         reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
