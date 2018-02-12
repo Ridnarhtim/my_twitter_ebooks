@@ -111,6 +111,7 @@ class ReplyingBot < Ebooks::Bot
     #do various actions depending on how interesting the tweet is
     delay do
       if very_interesting
+        log "Spotted a very interesting tweet: #{tweet.text}"
         favorite(tweet) if rand < 0.5
         retweet(tweet) if rand < 0.1
         if rand < 0.01
@@ -118,6 +119,7 @@ class ReplyingBot < Ebooks::Bot
           reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
         end
       elsif interesting
+        log "Spotted an interesting tweet: #{tweet.text}"
         favorite(tweet) if rand < 0.05
         if rand < 0.001
           userinfo(tweet.user.screen_name).pesters_left -= 1
