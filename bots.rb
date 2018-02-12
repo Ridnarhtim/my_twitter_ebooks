@@ -22,7 +22,7 @@ def top20;  @top20  ||= model.keywords.take(20); end
 #Standard replying ebooks bot
 class ReplyingBot < Ebooks::Bot
   
-  FILE_FORMATS = "{jpg,png,jpeg}"
+  FILE_FORMATS = "{jpg,png,jpeg,gif}"
 
   #The originating user
   attr_accessor :original, :model, :model_path
@@ -153,7 +153,10 @@ class ReplyingBot < Ebooks::Bot
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape ev.user.screen_name}/i)
 
       images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
-      pic = images.sample
+      loop do
+        pic = images.sample
+        break if verify_size(pic)
+      end
 
       log "Replying to @#{ev.user.screen_name} with:  #{text.inspect} - #{pic}"
       tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: ev.id))
@@ -166,8 +169,20 @@ class ReplyingBot < Ebooks::Bot
 
   def tweet_a_picture
     images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "**/*.{#{FILE_FORMATS}}")
-    pic = images.sample  
+
+    loop do     
+      pic = images.sample  
+      break if verify_size(pic)
+    end
+
     pictweet("",pic)
+  end
+
+  def verify_size(pic)
+    return true unless pic.end_with? ".gif"
+    
+    file_size_in_mb = File.size(pic).to_f / 2**20
+    return file_size_in_mb<5
   end
 
   # Find information we've collected about a user
