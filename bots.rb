@@ -53,8 +53,8 @@ class ReplyingBot < Ebooks::Bot
       end
     end
 
-    # Reload model every 24h (at 5 past midnight)
-    scheduler.cron '5 0 * * *' do  
+    # Reload model every 24h (at 5 minutes past 2am)
+    scheduler.cron '5 2 * * *' do  
       load_model!
     end
   end
@@ -82,7 +82,7 @@ class ReplyingBot < Ebooks::Bot
   # Reply to a mention
   def on_mention(tweet)
     # Become more inclined to pester a user when they talk to us
-    userinfo(tweet.user.screen_name).pesters_left += 
+    userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
       if rand < 0.2
         reply_with_image(tweet)
@@ -190,6 +190,13 @@ class ReplyingBot < Ebooks::Bot
     end
   end
 
+  # Logs info to stdout in the context of this bot
+  def log(*args)
+    timestamp = "[" + Time.now.inspect + "] "
+    STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
+    STDOUT.flush
+  end
+
   #load the model from file
   private
   def load_model!
@@ -198,13 +205,6 @@ class ReplyingBot < Ebooks::Bot
     log "Loading model #{model_path}"
     @model = Ebooks::Model.load(model_path)
   end
-
-  # Logs info to stdout in the context of this bot
-  def log(*args)
-    timestamp = "[" + Time.now.inspect + "] "
-    STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
-    STDOUT.flush
-  end  
 
 end
 
