@@ -155,10 +155,10 @@ class ReplyingBot < Ebooks::Bot
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape ev.user.screen_name}/i)
 
       images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
-      loop do
-        pic = images.sample
-        break if verify_size(pic)
+      pic = images.sample
+      while !verify_size(pic)
         log "file #{pic} too large, trying another"
+        pic = images.sample
       end
 
       log "Replying to @#{ev.user.screen_name} with:  #{text.inspect} - #{pic}"
@@ -173,10 +173,10 @@ class ReplyingBot < Ebooks::Bot
   def tweet_a_picture
     images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "**/*.{#{FILE_FORMATS}}")
 
-    loop do     
-      pic = images.sample  
-      break if verify_size(pic)
+    pic = images.sample
+    while !verify_size(pic)
       log "file #{pic} too large, trying another"
+      pic = images.sample
     end
 
     pictweet("",pic)
