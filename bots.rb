@@ -46,11 +46,11 @@ class ReplyingBot < Ebooks::Bot
   def on_startup
     load_model!
 
-    # Tweet every hour with an 80% chance
-    scheduler.cron '0 * * * *' do      
+    # Tweet every half hour with a 75% chance
+    scheduler.cron '*/30 * * * *' do      
       if rand < 0.05
         tweet_a_picture()
-      elsif rand < 0.8
+      elsif rand < 0.75
         tweet(model.make_statement)
       else
         log "Not tweeting this time"
