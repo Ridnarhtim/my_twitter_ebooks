@@ -158,6 +158,7 @@ class ReplyingBot < Ebooks::Bot
       loop do
         pic = images.sample
         break if verify_size(pic)
+        log "file #{pic} too large, trying another"
       end
 
       log "Replying to @#{ev.user.screen_name} with:  #{text.inspect} - #{pic}"
@@ -175,6 +176,7 @@ class ReplyingBot < Ebooks::Bot
     loop do     
       pic = images.sample  
       break if verify_size(pic)
+      log "file #{pic} too large, trying another"
     end
 
     pictweet("",pic)
