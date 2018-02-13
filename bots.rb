@@ -22,7 +22,7 @@ def top20;  @top20  ||= model.keywords.take(20); end
 #Standard replying ebooks bot
 class ReplyingBot < Ebooks::Bot
   
-  FILE_FORMATS = "{jpg,png,jpeg,gif}"
+  FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
 
   #The originating user
   attr_accessor :original, :model, :model_path
@@ -183,10 +183,13 @@ class ReplyingBot < Ebooks::Bot
   end
 
   def verify_size(pic)
-    return true unless pic.end_with? ".gif"
-    
     file_size_in_mb = File.size(pic).to_f / 2**20
-    return file_size_in_mb<5
+    
+    if(pic.end_with? ".gif" || pic.end_with? ".mp4")
+      return file_size_in_mb<15
+    else
+      return file_size_in_mb<5
+    end
   end
 
   # Find information we've collected about a user
