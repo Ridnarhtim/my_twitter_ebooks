@@ -185,7 +185,7 @@ class ReplyingBot < Ebooks::Bot
   def verify_size(pic)
     file_size_in_mb = File.size(pic).to_f / 2**20
     
-    if(pic.end_with? ".gif" || pic.end_with? ".mp4")
+    if (pic.end_with? ".gif") || (pic.end_with? ".mp4")
       return file_size_in_mb<15
     else
       return file_size_in_mb<5
