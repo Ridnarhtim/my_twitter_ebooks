@@ -48,7 +48,7 @@ class ReplyingBot < Ebooks::Bot
 
     # Tweet every half hour with a 75% chance
     scheduler.cron '*/30 * * * *' do      
-      if rand < 0.05
+      if rand < 0.1
         tweet_a_picture()
       elsif rand < 0.75
         tweet(model.make_statement)
