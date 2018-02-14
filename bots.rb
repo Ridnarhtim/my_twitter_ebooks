@@ -49,7 +49,9 @@ class ReplyingBot < Ebooks::Bot
     # Tweet every half hour with a 75% chance
     scheduler.cron '*/30 * * * *' do      
       if rand < 0.1
-        tweet_a_picture()
+        unless tweet_a_picture()
+          tweet(model.make_statement)
+        end
       elsif rand < 0.75
         tweet(model.make_statement)
       else
@@ -89,7 +91,9 @@ class ReplyingBot < Ebooks::Bot
     userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
       if rand < 0.25
-        reply_with_image(tweet)
+        unless reply_with_image(tweet)
+          reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
+        end
       else
         reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
       end
@@ -140,6 +144,7 @@ class ReplyingBot < Ebooks::Bot
 
   #HELPERS
 
+  #Reply with a picture
   def reply_with_image(ev, opts={})
     opts = opts.clone
 
@@ -155,40 +160,56 @@ class ReplyingBot < Ebooks::Bot
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape ev.user.screen_name}/i)
 
       images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
+
+      begin
+        retries ||= 0        
+        pic = images.sample
+        while !verify_size(pic)
+          log "file #{pic} too large, trying another"
+          pic = images.sample
+        end
+
+        log "Replying to @#{ev.user.screen_name} with:  #{text.inspect} - #{pic}"
+        tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: ev.id))
+        conversation(tweet).add(tweet)
+        tweet
+        return true
+      rescue       
+        log "Couldn't tweet #{pic} for some reason"
+        retry if (retries += 1) < 5
+      end
+    else
+      log "Don't know how to reply to a #{ev.class}"
+    end
+    return false
+  end
+
+  #Tweet out a picture
+  def tweet_a_picture
+    images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "**/*.{#{FILE_FORMATS}}")
+    begin
+      retries ||= 0
       pic = images.sample
       while !verify_size(pic)
         log "file #{pic} too large, trying another"
         pic = images.sample
       end
-
-      log "Replying to @#{ev.user.screen_name} with:  #{text.inspect} - #{pic}"
-      tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: ev.id))
-      conversation(tweet).add(tweet)
-      tweet
-    else
-      log "Don't know how to reply to a #{ev.class}"
+      pictweet("",pic)
+      return true
+    rescue
+      log "Couldn't tweet #{pic} for some reason"   
+      retry if (retries += 1) < 5
     end
+    return false
   end
 
-  def tweet_a_picture
-    images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "**/*.{#{FILE_FORMATS}}")
-
-    pic = images.sample
-    while !verify_size(pic)
-      log "file #{pic} too large, trying another"
-      pic = images.sample
-    end
-
-    pictweet("",pic)
-  end
-
+  #Verify that the selected picture is small enough to upload to Twitter
   def verify_size(pic)
     file_size_in_mb = File.size(pic).to_f / 2**20
-    
     if (pic.end_with? ".gif") || (pic.end_with? ".mp4")
-      return file_size_in_mb<15
-    else
       return file_size_in_mb<5
+    else
+      return file_size_in_mb<3
     end
   end
 
