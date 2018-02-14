@@ -146,9 +146,9 @@ class ReplyingBot < Ebooks::Bot
 
   #make a response that doesn't end with ...
   def make_response_wrapper(tweet)
-    response = make_response(meta(tweet).mentionless, meta(tweet).limit)
+    response = model.make_response(meta(tweet).mentionless, meta(tweet).limit)
     while response.end_with? "..."
-      response = make_response(meta(tweet).mentionless, meta(tweet).limit)
+      response = model.make_response(meta(tweet).mentionless, meta(tweet).limit)
     end
     return response
   end
