@@ -50,10 +50,10 @@ class ReplyingBot < Ebooks::Bot
     scheduler.cron '*/30 * * * *' do      
       if rand < 0.1
         unless tweet_a_picture()
-          tweet(model.make_statement)
+          tweet(make_statement_wrapper)
         end
       elsif rand < 0.75
-        tweet(model.make_statement)
+        tweet(make_statement_wrapper)
       else
         log "Not tweeting this time"
       end
@@ -92,10 +92,10 @@ class ReplyingBot < Ebooks::Bot
     delay do
       if rand < 0.25
         unless reply_with_image(tweet)
-          reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
+          reply(tweet, make_response_wrapper(tweet))
         end
       else
-        reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
+        reply(tweet, make_response_wrapper(tweet))
       end
     end
   end
@@ -120,14 +120,14 @@ class ReplyingBot < Ebooks::Bot
         retweet(tweet) if rand < 0.1
         if rand < 0.05 #0.01
           userinfo(tweet.user.screen_name).pesters_left -= 1
-          reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
+          reply(tweet, make_response_wrapper(tweet))
         end
       elsif interesting
         log "Spotted an interesting tweet: #{tweet.text}"
         favorite(tweet) if rand < 0.05
         if rand < 0.01 #0.001
           userinfo(tweet.user.screen_name).pesters_left -= 1
-          reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
+          reply(tweet, make_response_wrapper(tweet))
         end
       end
     end
@@ -143,6 +143,25 @@ class ReplyingBot < Ebooks::Bot
 
 
   #HELPERS
+
+  #make a response that doesn't end with ...
+  def make_response_wrapper(tweet)
+    response = make_response(meta(tweet).mentionless, meta(tweet).limit)
+    while response.end_with? "..."
+      response = make_response(meta(tweet).mentionless, meta(tweet).limit)
+    end
+    return response
+  end
+
+  #make a statement that doesn't end with ...
+  def make_statement_wrapper
+    statement = model.make_statement
+    while statement.end_with? "..."
+      statement = model.make_statement
+    end
+    return statement
+  end
+
 
   #Reply with a picture
   def reply_with_image(ev, opts={})
