@@ -35,7 +35,7 @@ class ReplyingBot < Ebooks::Bot
     self.consumer_secret = ENV["CONSUMER_SECRET"] # Your app consumer secret
 
     # Users to block instead of interacting with
-    self.blacklist = []
+    self.blacklist = ['GirlsruleNZ']
 
     # Range in seconds to randomize delay when bot.delay is called
     self.delay_range = 1..6
@@ -48,7 +48,7 @@ class ReplyingBot < Ebooks::Bot
 
     # Tweet every half hour with a 75% chance
     scheduler.cron '*/30 * * * *' do      
-      if rand < 0.1
+      if rand < 0.02
         unless tweet_a_picture()
           tweet(make_statement_wrapper)
         end
@@ -90,7 +90,7 @@ class ReplyingBot < Ebooks::Bot
     # Become more inclined to pester a user when they talk to us
     userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
-      if rand < 0.25
+      if rand < 0.1
         unless reply_with_image(tweet)
           reply(tweet, make_response_wrapper(tweet))
         end
@@ -147,8 +147,11 @@ class ReplyingBot < Ebooks::Bot
   #make a response that doesn't end with ...
   def make_response_wrapper(tweet)
     response = model.make_response(meta(tweet).mentionless, meta(tweet).limit)
-    while response.end_with? "..."
+    retries ||= 0
+    while response.end_with? "..." and retries < 5
+      log "Not tweeting #{response}"
       response = model.make_response(meta(tweet).mentionless, meta(tweet).limit)
+      retries += 1 
     end
     return response
   end
@@ -156,8 +159,11 @@ class ReplyingBot < Ebooks::Bot
   #make a statement that doesn't end with ...
   def make_statement_wrapper
     statement = model.make_statement
-    while statement.end_with? "..."
+    retries ||= 0
+    while statement.end_with? "..."  and retries < 5
+      log "Not tweeting #{statement}"
       statement = model.make_statement
+      retries += 1
     end
     return statement
   end
@@ -205,7 +211,7 @@ class ReplyingBot < Ebooks::Bot
 
   #Tweet out a picture
   def tweet_a_picture
-    images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "**/*.{#{FILE_FORMATS}}")
+    images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
     begin
       retries ||= 0
       pic = images.sample
@@ -231,7 +237,6 @@ class ReplyingBot < Ebooks::Bot
       return file_size_in_mb<3
     end
   end
-
   # Find information we've collected about a user
   # @param username [String]
   # @return [Ebooks::UserInfo]
