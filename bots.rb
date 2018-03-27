@@ -75,7 +75,7 @@ class ReplyingBot < Ebooks::Bot
       @botinfo.each do |botname, botinfo|
         log "resetting bot counters"
         botinfo.replies_left = 10
-        log "@#{botinfo.replies} replies left to bot @#{botname}"
+        log "@#{botinfo.replies_left} replies left to bot @#{botname}"
       end
     end
 
