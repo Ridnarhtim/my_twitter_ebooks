@@ -1,3 +1,4 @@
 Gemfile.lock
 corpus/*.json
 model/*.model
+update_model
