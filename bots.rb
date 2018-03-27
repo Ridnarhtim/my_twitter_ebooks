@@ -26,7 +26,7 @@ class BotInfo
   # @param username [String]
   def initialize(username)
     @username = username
-    @replies_left = 15
+    @replies_left = 10
   end
 end
 
@@ -73,9 +73,7 @@ class ReplyingBot < Ebooks::Bot
 
       #also reset bot-reply-counters
       @botinfo.each do |botname, botinfo|
-        log "resetting bot counters"
         botinfo.replies_left = 10
-        log "@#{botinfo.replies_left} replies left to bot @#{botname}"
       end
     end
 
