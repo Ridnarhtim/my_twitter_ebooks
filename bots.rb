@@ -16,6 +16,20 @@ class UserInfo
   end
 end
 
+# Information about a particular Bot we know
+class BotInfo
+  attr_reader :username
+
+  # @return [Integer] how many times we can reply to this bot
+  attr_accessor :replies_left
+
+  # @param username [String]
+  def initialize(username)
+    @username = username
+    @replies_left = 15
+  end
+end
+
 def top100; @top100 ||= model.keywords.take(100); end
 def top20;  @top20  ||= model.keywords.take(20); end
 
@@ -30,12 +44,16 @@ class ReplyingBot < Ebooks::Bot
   # Configuration here applies to all ReplyingBots
   def configure
     # Users to block instead of interacting with
-    self.blacklist = [ENV["BOT_NAME_1"],ENV["BOT_NAME_2"]]
+    self.blacklist = []
 
     # Range in seconds to randomize delay when bot.delay is called
     self.delay_range = 1..6
 
     @userinfo = {}
+    @botinfo = {
+      ENV["BOT_NAME_1"] => BotInfo.new(ENV["BOT_NAME_1"]),
+      ENV["BOT_NAME_2"] => BotInfo.new(ENV["BOT_NAME_2"])
+    }
   end
 
   def on_startup
@@ -51,6 +69,13 @@ class ReplyingBot < Ebooks::Bot
         tweet(make_statement_wrapper)
       else
         log "Not tweeting this time"
+      end
+
+      #also reset bot-reply-counters
+      botinfo.each do |botname, botinfo|
+        log "resetting bot counters"
+        botinfo.replies_left = 10
+        log "@#{botinfo.replies} replies left"
       end
     end
 
@@ -82,16 +107,34 @@ class ReplyingBot < Ebooks::Bot
 
   # Reply to a mention
   def on_mention(tweet)
+
+    if @botinfo.key?(tweet.user.screen_name)
+      bot = botinfo[tweet.user.screen_name]
+      if bot.replies_left > 0 and rand < 0.75
+        bot.replies_left -= 1
+        delay do
+          do_reply(tweet)
+        end
+        if(bot.replies_left == 0)
+          log "replies_left = 0 for user " + tweet.user.screen_name
+        end
+      end
+    end
+
     # Become more inclined to pester a user when they talk to us
     userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
-      if rand < 0.2
-        unless reply_with_image(tweet)
-          reply(tweet, make_response_wrapper(tweet))
-        end
-      else
+      do_reply(tweet)
+    end
+  end
+
+  def do_reply(tweet)
+    if rand < 0.2
+      unless reply_with_image(tweet)
         reply(tweet, make_response_wrapper(tweet))
       end
+    else
+      reply(tweet, make_response_wrapper(tweet))
     end
   end
 
