@@ -72,7 +72,7 @@ class ReplyingBot < Ebooks::Bot
       end
 
       #also reset bot-reply-counters
-      botinfo.each do |botname, botinfo|
+      @botinfo.each do |botname, botinfo|
         log "resetting bot counters"
         botinfo.replies_left = 10
         log "@#{botinfo.replies} replies left"
@@ -110,7 +110,7 @@ class ReplyingBot < Ebooks::Bot
 
     #this is a bot we know
     if @botinfo.key?(tweet.user.screen_name)
-      bot = botinfo[tweet.user.screen_name]
+      bot = @botinfo[tweet.user.screen_name]
       if bot.replies_left > 0 and rand < 0.75
         #reply to the bot
         bot.replies_left -= 1
@@ -155,7 +155,6 @@ class ReplyingBot < Ebooks::Bot
     #do various actions depending on how interesting the tweet is
     delay do
       if very_interesting
-        log "Spotted a very interesting tweet: #{tweet.text}"
         favorite(tweet) if rand < 0.5
         retweet(tweet) if rand < 0.1
         if rand < 0.05 #0.01
@@ -163,7 +162,6 @@ class ReplyingBot < Ebooks::Bot
           reply(tweet, make_response_wrapper(tweet))
         end
       elsif interesting
-        log "Spotted an interesting tweet: #{tweet.text}"
         favorite(tweet) if rand < 0.05
         if rand < 0.01 #0.001
           userinfo(tweet.user.screen_name).pesters_left -= 1
