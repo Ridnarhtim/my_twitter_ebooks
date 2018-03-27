@@ -108,13 +108,15 @@ class ReplyingBot < Ebooks::Bot
   # Reply to a mention
   def on_mention(tweet)
 
+    #this is a bot we know
     if @botinfo.key?(tweet.user.screen_name)
       bot = botinfo[tweet.user.screen_name]
       if bot.replies_left > 0 and rand < 0.75
+        #reply to the bot
         bot.replies_left -= 1
-        delay do
-          do_reply(tweet)
-        end
+        sleep(rand(10..45))
+        do_reply(tweet)
+
         if(bot.replies_left == 0)
           log "replies_left = 0 for user " + tweet.user.screen_name
         end
