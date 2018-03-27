@@ -112,20 +112,21 @@ class ReplyingBot < Ebooks::Bot
       if bot.replies_left > 0 and rand < 0.75
         #reply to the bot
         bot.replies_left -= 1
-        sleep(rand(10..45))
+        sleep(rand(10..60))
         do_reply(tweet)
 
         if(bot.replies_left == 0)
           log "replies_left = 0 for user " + tweet.user.screen_name
         end
       end
-    end
-
-    # Become more inclined to pester a user when they talk to us
-    userinfo(tweet.user.screen_name).pesters_left += 1
-    delay do
-      do_reply(tweet)
-    end
+	  
+    else
+	  # Become more inclined to pester a user when they talk to us
+	  userinfo(tweet.user.screen_name).pesters_left += 1
+	  delay do
+	  do_reply(tweet)
+      end
+	end
   end
 
   def do_reply(tweet)
