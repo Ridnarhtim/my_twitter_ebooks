@@ -25,17 +25,12 @@ class ReplyingBot < Ebooks::Bot
   FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
 
   #The originating user
-  attr_accessor :original, :model, :model_path
+  attr_accessor :original, :model, :model_path, :tweet_pics
 
   # Configuration here applies to all ReplyingBots
   def configure
-    # Consumer details come from registering an app at https://dev.twitter.com/
-    # Once you have consumer details, use "ebooks auth" for new access tokens
-    self.consumer_key = ENV["CONSUMER_KEY"] # Your app consumer key
-    self.consumer_secret = ENV["CONSUMER_SECRET"] # Your app consumer secret
-
     # Users to block instead of interacting with
-    self.blacklist = ['GirlsruleNZ']
+    self.blacklist = [ENV["BOT_NAME_1"],ENV["BOT_NAME_2"]]
 
     # Range in seconds to randomize delay when bot.delay is called
     self.delay_range = 1..6
@@ -48,7 +43,7 @@ class ReplyingBot < Ebooks::Bot
 
     # Tweet every half hour with a 75% chance
     scheduler.cron '*/30 * * * *' do      
-      if rand < 0.02
+      if rand < 0.05
         unless tweet_a_picture()
           tweet(make_statement_wrapper)
         end
@@ -90,7 +85,7 @@ class ReplyingBot < Ebooks::Bot
     # Become more inclined to pester a user when they talk to us
     userinfo(tweet.user.screen_name).pesters_left += 1
     delay do
-      if rand < 0.1
+      if rand < 0.2
         unless reply_with_image(tweet)
           reply(tweet, make_response_wrapper(tweet))
         end
@@ -171,6 +166,7 @@ class ReplyingBot < Ebooks::Bot
 
   #Reply with a picture
   def reply_with_image(ev, opts={})
+    return false unless tweet_pics
     opts = opts.clone
 
     if ev.is_a? Twitter::Tweet
@@ -211,6 +207,7 @@ class ReplyingBot < Ebooks::Bot
 
   #Tweet out a picture
   def tweet_a_picture
+    return false unless tweet_pics
     images = Dir.glob(ENV["RANDOM_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
     begin
       retries ||= 0
@@ -285,9 +282,146 @@ class ReplyingBot < Ebooks::Bot
 
 end
 
+
+# Make bots
+ReplyingBot.new(ENV["BOT_NAME_1"]) do |bot|
+  bot.access_token = ENV["ACCESS_TOKEN_1"] # Token connecting the app to this account
+  bot.access_token_secret = ENV["ACCESS_TOKEN_SECRET_1"] # Secret connecting the app to this account
+  bot.consumer_key = ENV["CONSUMER_KEY_1"] # Your app consumer key
+  bot.consumer_secret = ENV["CONSUMER_SECRET_1"] # Your app consumer secret
+  bot.original = ENV["BOT_ORIGINAL_USER_1"]
+  bot.tweet_pics = true
+end
+
+ReplyingBot.new(ENV["BOT_NAME_2"]) do |bot|
+  bot.access_token = ENV["ACCESS_TOKEN_2"] # Token connecting the app to this account
+  bot.access_token_secret = ENV["ACCESS_TOKEN_SECRET_2"] # Secret connecting the app to this account
+  bot.consumer_key = ENV["CONSUMER_KEY_2"] # Your app consumer key
+  bot.consumer_secret = ENV["CONSUMER_SECRET_2"] # Your app consumer secret
+  bot.original = ENV["BOT_ORIGINAL_USER_2"]
+  bot.tweet_pics = false
+end
+
+
+
+#A bot that posts pics
+class Picbot < Ebooks::Bot
+  
+  FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
+ 
+  # Configuration here applies to all Picbot
+  def configure
+    self.consumer_key = ENV["PICBOT_CONSUMER_KEY"] # Your app consumer key
+    self.consumer_secret = ENV["PICBOT_CONSUMER_SECRET"] # Your app consumer secret
+  end
+
+  def on_startup
+    # Tweet every half hour with a 75% chance
+    scheduler.cron '*/30 * * * *' do      
+      if rand < 0.8
+        tweet_a_picture()
+      else
+        log "Not tweeting this time"
+      end
+    end
+  end
+
+
+  #EVENTS
+
+  # Reply to a DM
+  def on_message(dm)
+    #do nothing
+  end
+
+  # Follow a user back
+  def on_follow(user)
+    #do nothing
+  end
+
+  # Reply to a mention
+  def on_mention(tweet)
+    #do nothing
+  end
+
+  # Reply to a tweet in the bot's timeline
+  def on_timeline(tweet)
+    #do nothing
+  end
+
+  def on_favorite(user, tweet)
+    #don't do anything
+  end
+
+  def on_retweet(tweet)
+    #don't do anything
+  end
+
+
+  #HELPERS
+
+  #Tweet out a picture
+  def tweet_a_picture
+    images = Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
+    begin
+      retries ||= 0
+      pic = images.sample
+      while !verify_size(pic)
+        log "file #{pic} too large, trying another"
+        pic = images.sample
+      end
+      pixivurl = get_url(pic)
+      pictweet(pixivurl,pic)
+      return true
+    rescue
+      log "Couldn't tweet #{pic} for some reason"   
+      retry if (retries += 1) < 5
+    end
+    return false
+  end
+
+  def get_url(pic)
+    if pic.include? "Pixiv"
+      return get_pixiv_url(pic) 
+    elsif pic.include? "Danbooru"
+      return get_danbooru_url(pic) 
+    else
+      return ""
+    end
+  end
+
+  def get_pixiv_url(pic)
+    pixiv_id = pic.split('/').last.split('_').first
+    return "" unless pixiv_id.length <= 8 && pixiv_id.scan(/\D/).empty?
+    return "https://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + pixiv_id
+  end
+
+  def get_danbooru_url(pic)
+    danbooru_id = pic.split('_').last.split('.').first
+    return "" unless danbooru_id.length <= 8 && danbooru_id.scan(/\D/).empty?
+    return "http://www.danbooru.donmai.us/posts/" + danbooru_id
+  end
+
+  #Verify that the selected picture is small enough to upload to Twitter
+  def verify_size(pic)
+    file_size_in_mb = File.size(pic).to_f / 2**20
+    if (pic.end_with? ".gif") || (pic.end_with? ".mp4")
+      return file_size_in_mb<5
+    else
+      return file_size_in_mb<3
+    end
+  end
+
+  # Logs info to stdout in the context of this bot
+  def log(*args)
+    timestamp = "[" + Time.now.inspect + "] "
+    STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
+    STDOUT.flush
+  end
+end
+
 # Make bot
-ReplyingBot.new(ENV["BOT_NAME"]) do |bot|
-  bot.access_token = ENV["ACCESS_TOKEN"] # Token connecting the app to this account
-  bot.access_token_secret = ENV["ACCESS_TOKEN_SECRET"] # Secret connecting the app to this account
-  bot.original = ENV["BOT_ORIGINAL_USER"]
+Picbot.new(ENV["PICBOT_NAME"]) do |bot|
+  bot.access_token = ENV["PICBOT_ACCESS_TOKEN"] # Token connecting the app to this account
+  bot.access_token_secret = ENV["PICBOT_ACCESS_TOKEN_SECRET"] # Secret connecting the app to this account
 end
