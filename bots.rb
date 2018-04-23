@@ -115,7 +115,7 @@ class ReplyingBot < Ebooks::Bot
         sleep(rand(10..60))
         do_reply(tweet)
 
-        if(bot.replies_left == 0)
+        if bot.replies_left == 0
           log "replies_left = 0 for user " + tweet.user.screen_name
         end
       end
@@ -202,9 +202,25 @@ class ReplyingBot < Ebooks::Bot
       statement = model.make_statement
       retries += 1
     end
+    if rand < 1
+      statement = tag_other_bot(statement)
+    end
     return statement
   end
 
+  def tag_other_bot(statement)
+    if @username == ENV["BOT_NAME_1"]
+      other_bot = ENV["BOT_NAME_2"]
+    elsif @username == ENV["BOT_NAME_2"]
+      other_bot = ENV["BOT_NAME_1"]
+    end
+
+    if other_bot != nil
+      statement = "@" + other_bot + " " + statement
+    end
+
+    return statement
+  end
 
   #Reply with a picture
   def reply_with_image(ev, opts={})
