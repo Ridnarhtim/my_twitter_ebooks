@@ -119,7 +119,7 @@ class ReplyingBot < Ebooks::Bot
           log "replies_left = 0 for user " + tweet.user.screen_name
         end
       else
-	log "not replying to bot"
+        log "not replying to bot"
       end
 	  
     else
