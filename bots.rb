@@ -204,7 +204,7 @@ class ReplyingBot < Ebooks::Bot
       statement = model.make_statement
       retries += 1
     end
-    if rand < 1
+    if rand < 0.01
       statement = tag_other_bot(statement)
     end
     return statement

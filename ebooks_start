@@ -1,5 +1,2 @@
 #!/bin/bash
-until ebooks start >> /home/pi/logs/ebooks.log 2>&1; do
-    echo "Twitter bots crashed with exit code $?.  Respawning.." >&2
-    sleep 1
-done
+ebooks start >> /home/pi/logs/ebooks.log 2>&1
