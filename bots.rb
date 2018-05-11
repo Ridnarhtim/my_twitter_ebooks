@@ -199,7 +199,7 @@ class ReplyingBot < Ebooks::Bot
   def make_statement_wrapper
     statement = model.make_statement
     retries ||= 0
-    while statement.end_with? "..."  and retries < 5
+    while (statement.end_with? "..." or statement.empty?) and retries < 5
       log "Not tweeting #{statement}"
       statement = model.make_statement
       retries += 1
