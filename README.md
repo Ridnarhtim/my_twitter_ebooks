@@ -1,2 +1,3 @@
 # my_twitter_ebooks
-Based off https://github.com/mispy/ebooks_example
+Using https://github.com/grindcrank/twitter_ebooks
+and https://github.com/mispy/ebooks_example
