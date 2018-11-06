@@ -421,7 +421,7 @@ class Picbot < Ebooks::Bot
 
   #Tweet out a picture
   def tweet_a_picture
-    images = Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
+    images = pick_image_folder
     begin
       retries ||= 0
       pic = images.sample
@@ -437,6 +437,13 @@ class Picbot < Ebooks::Bot
       retry if (retries += 1) < 5
     end
     return false
+  end
+
+  def pick_image_folder
+    base_path = ENV["LEWD_IMAGE_DIR"]
+    folder = "Bot"
+    images = Dir.glob(base_path + folder + "/**/*.{#{FILE_FORMATS}}")
+    return images
   end
 
   def get_url(pic)
