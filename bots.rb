@@ -448,7 +448,7 @@ class Picbot < Ebooks::Bot
     if(today.month == 2 && today.day == 14)
       folder = "Seasonal/ValentinesDay"
 
-    elsif(today.month = easter.month && today.day == easter.day)
+    elsif(today.month == easter.month && today.day == easter.day)
       folder = "Seasonal/Easter"
 
     elsif(today.month == 10  && today.day == 31)
