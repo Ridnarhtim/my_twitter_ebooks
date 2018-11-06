@@ -20,15 +20,19 @@ end
 
 # Information about a particular Bot we know
 class BotInfo
-  attr_reader :username
-
-  # @return [Integer] how many times we can reply to this bot
+  MAX_REPLIES = 10
   attr_accessor :replies_left
 
-  # @param username [String]
-  def initialize(username)
-    @username = username
-    @replies_left = 10
+  def initialize()
+    reset()
+  end
+
+  def reset()
+    @replies_left = MAX_REPLIES
+  end
+
+  def should_reply_to()
+    return rand<(@replies_left.to_f/MAX_REPLIES)
   end
 end
 
@@ -52,8 +56,8 @@ class ReplyingBot < Ebooks::Bot
 
     @userinfo = {}
     @botinfo = {
-      ENV["BOT_NAME_1"] => BotInfo.new(ENV["BOT_NAME_1"]),
-      ENV["BOT_NAME_2"] => BotInfo.new(ENV["BOT_NAME_2"])
+      ENV["BOT_NAME_1"] => BotInfo.new(),
+      ENV["BOT_NAME_2"] => BotInfo.new()
     }
   end
 
@@ -73,8 +77,8 @@ class ReplyingBot < Ebooks::Bot
       end
 
       #also reset bot-reply-counters
-      @botinfo.each do |botname, botinfo|
-        botinfo.replies_left = 10
+      @botinfo.each do |botname, bot|
+        bot.reset()
       end
     end
 
@@ -110,15 +114,11 @@ class ReplyingBot < Ebooks::Bot
     #this is a bot we know
     if @botinfo.key?(tweet.user.screen_name)
       bot = @botinfo[tweet.user.screen_name]
-      if bot.replies_left > 0 and rand < 0.75
+      if bot.should_reply_to()
         #reply to the bot
         bot.replies_left -= 1
-        sleep(rand(10..45))
+        sleep(rand(5..30))
         do_reply(tweet)
-
-        if bot.replies_left == 0
-          log "replies_left = 0 for user " + tweet.user.screen_name
-        end
       else
         log "not replying to bot"
       end
