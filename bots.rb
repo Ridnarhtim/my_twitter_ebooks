@@ -38,13 +38,12 @@ class ReplyingBot < Ebooks::Bot
   
   FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
 
-  #The originating user
   attr_accessor :original, :model, :model_path, :tweet_pics
 
   # Configuration here applies to all ReplyingBots
   def configure
     # Users to block instead of interacting with
-    self.blacklist = []
+    self.blacklist = ['mcamargo1997']
 
     # Range in seconds to randomize delay when bot.delay is called
     self.delay_range = 1..6
@@ -368,8 +367,8 @@ end
 class Picbot < Ebooks::Bot
   
   FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
- 
-  # Configuration here applies to all Picbot
+
+  # Configuration here applies to all Picbots
   def configure
     self.consumer_key = ENV["PICBOT_CONSUMER_KEY"] # Your app consumer key
     self.consumer_secret = ENV["PICBOT_CONSUMER_SECRET"] # Your app consumer secret

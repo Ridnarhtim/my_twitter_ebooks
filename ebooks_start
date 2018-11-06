@@ -1,2 +1,2 @@
 #!/bin/bash
-ebooks start >> /home/pi/logs/ebooks.log 2>&1
+/usr/local/bin/ebooks start >> /home/pi/logs/ebooks.log 2>&1
