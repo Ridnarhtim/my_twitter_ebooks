@@ -65,7 +65,7 @@ class ReplyingBot < Ebooks::Bot
     load_model!
 
     # Tweet every half hour with a 75% chance
-    scheduler.cron '*/30 * * * *' do      
+    scheduler.cron '*/30 * * * *' do
       if rand < 0.05
         unless tweet_a_picture()
           tweet(make_statement_wrapper)
@@ -446,19 +446,19 @@ class Picbot < Ebooks::Bot
     easter = Date::easter(today.year)    
 
     if(today.month == 2 && today.day == 14)
-      folder = "Seasonal/ValentinesDay"
+      folder = "/Seasonal/ValentinesDay"
 
     elsif(today.month == easter.month && today.day == easter.day)
-      folder = "Seasonal/Easter"
+      folder = "/Seasonal/Easter"
 
     elsif(today.month == 10  && today.day == 31)
-      folder = "Seasonal/Halloween"
+      folder = "/Seasonal/Halloween"
  
     elsif(today.month == 12 && today.day.between?(24,26))
-      folder = "Seasonal/Christmas"
+      folder = "/Seasonal/Christmas"
 
     else
-      folder = "Bot"      
+      folder = "/Bot"      
     end
 
     base_path = ENV["LEWD_IMAGE_DIR"]

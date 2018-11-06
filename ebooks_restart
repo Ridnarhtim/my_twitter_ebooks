@@ -1,1 +1,1 @@
-killall ebooks && ./ebooks_start
+pkill -f "ebooks start" && ./ebooks_start
