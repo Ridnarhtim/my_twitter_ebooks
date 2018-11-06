@@ -3,10 +3,3 @@ corpus/*.json
 model/*.model
 update_model
 *.json
-
-.*.swp
-pkg
-.yardoc
-doc
-.idea
-

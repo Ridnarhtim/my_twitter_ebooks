@@ -1,8 +1,0 @@
-language: ruby
-rvm:
-  - 2.2.0
-script:
-  - rspec spec
-notifications:
-  email:
-    - ebooks@zwergenmaschine.de
