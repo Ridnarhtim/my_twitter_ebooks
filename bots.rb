@@ -1,4 +1,6 @@
 require 'twitter_ebooks'
+require 'date'
+require 'date_easter'
 
 #based on the bot example found at https://github.com/mispy/ebooks_example
 
@@ -440,8 +442,26 @@ class Picbot < Ebooks::Bot
   end
 
   def pick_image_folder
+    today = Date.today
+    easter = Date::easter(today.year)    
+
+    if(today.month == 2 && today.day == 14)
+      folder = "Seasonal/ValentinesDay"
+
+    elsif(today.month = easter.month && today.day == easter.day)
+      folder = "Seasonal/Easter"
+
+    elsif(today.month == 10  && today.day == 31)
+      folder = "Seasonal/Halloween"
+ 
+    elsif(today.month == 12 && today.day.between?(24,26))
+      folder = "Seasonal/Christmas"
+
+    else
+      folder = "Bot"      
+    end
+
     base_path = ENV["LEWD_IMAGE_DIR"]
-    folder = "Bot"
     images = Dir.glob(base_path + folder + "/**/*.{#{FILE_FORMATS}}")
     return images
   end
