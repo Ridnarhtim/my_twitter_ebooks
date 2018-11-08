@@ -205,7 +205,7 @@ class ReplyingBot < Ebooks::Bot
       statement = model.make_statement
       retries += 1
     end
-    if rand < 0.01
+    if rand < 0.025
       statement = tag_other_bot(statement)
     end
     return statement
@@ -453,6 +453,9 @@ class Picbot < Ebooks::Bot
 
     elsif(today.month == 10  && today.day == 31)
       folder = "/Seasonal/Halloween"
+
+    elsif(today.month == 11 && today.day == 7)
+      folder = "/Seasonal/Navel"
  
     elsif(today.month == 12 && today.day.between?(24,26))
       folder = "/Seasonal/Christmas"
