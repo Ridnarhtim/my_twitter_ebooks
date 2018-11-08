@@ -2,6 +2,7 @@ require 'twitter_ebooks'
 require 'date'
 require 'date_easter'
 require 'time'
+require_relative 'picture_settings'
 
 #based on the bot example found at https://github.com/mispy/ebooks_example
 
@@ -368,84 +369,50 @@ end
 
 
 #A bot that posts pics
-class Picbot < Ebooks::Bot
-  
-  FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
+class Picbot < Ebooks::Bot 
+
+  attr_accessor :settings
 
   # Configuration here applies to all Picbots
   def configure
     self.consumer_key = ENV["PICBOT_CONSUMER_KEY"] # Your app consumer key
     self.consumer_secret = ENV["PICBOT_CONSUMER_SECRET"] # Your app consumer secret
+    @settings = PictureSettingsContainer.new()
   end
 
   #SCHEDULER
 
   def on_startup
     scheduler.cron '*/30 * * * *' do
-      tweet()
+      picture_settings = settings.get_picture_settings
+      tweet_a_picture(picture_settings)
     end
   end
 
   #TWEETING
 
-  def tweet
-    pictures = select_picture_folder
-    if Time.now.between?(Time.parse("7:59"),Time.parse("8:01"))
-      tweet_a_picture(pictures, "Good morning")
-    else
-      tweet_a_picture_with_chance(pictures, "", 0.8)
-    end
-  end
-
-  def tweet_a_picture_with_chance(pictures, message, chance)
-    if rand<chance  
-      tweet_a_picture(pictures, message)
+  def tweet_a_picture(picture_settings)
+    if rand<picture_settings.chance  
+      tweet_a_picture_internal(picture_settings)
     else
       log "Not tweeting this time"
     end
   end
 
-  def tweet_a_picture(pictures, message)
+  def tweet_a_picture_internal(picture_settings)
+    pictures = picture_settings.get_directory  
     begin
       retries ||= 0
       pic = select_a_picture(pictures)
-      text = get_text(message, pic)
+      text = get_text(picture_settings.message, pic)
       pictweet(text,pic)
     rescue
       log "Couldn't tweet #{pic} for some reason"   
       retry if (retries += 1) < 5
     end
   end
-    
+  
   #HELPERS
-      
-  def select_picture_folder
-    today = Date.today
-    easter = Date::easter(today.year)    
-
-    if(today.month == 2 && today.day == 14)
-      folder = "/Seasonal/ValentinesDay"
-
-    elsif(today.month == easter.month && today.day == easter.day)
-      folder = "/Seasonal/Easter"
-
-    elsif(today.month == 10  && today.day == 31)
-      folder = "/Seasonal/Halloween"
-
-    elsif(today.month == 11 && today.day == 7)
-      folder = "/Seasonal/Navel"
- 
-    elsif(today.month == 12 && today.day.between?(24,26))
-      folder = "/Seasonal/Christmas"
-
-    else
-      folder = "/Bot"      
-    end
-
-    base_path = ENV["LEWD_IMAGE_DIR"]
-    pictures = Dir.glob(base_path + folder + "/**/*.{#{FILE_FORMATS}}")
-    return pictures
-  end
   
   def select_a_picture(pictures)
     pic = pictures.sample
