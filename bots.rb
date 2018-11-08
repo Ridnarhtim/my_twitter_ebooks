@@ -384,6 +384,7 @@ class Picbot < Ebooks::Bot
 
   def on_startup
     scheduler.cron '*/30 * * * *' do
+      sleep(5)
       picture_settings = settings.get_picture_settings
       tweet_a_picture(picture_settings)
     end
