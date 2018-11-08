@@ -1,3 +1,4 @@
+require 'twitter_ebooks'
 require_relative 'bot_info'
 require_relative 'user_info'
 
@@ -57,23 +58,6 @@ class ReplyingBot < Ebooks::Bot
 
 
   #EVENTS
-
-  # Reply to a DM
-  def on_message(dm)
-    delay do
-      reply(dm, model.make_response(dm.text))
-    end
-  end
-
-  # Follow a user back
-  def on_follow(user)
-    if can_follow?(user.screen_name)
-      follow(user.screen_name)
-    else
-      log "Not following @#{user.screen_name}"
-    end
-    # follow(user.screen_name)
-  end
 
   # Reply to a mention
   def on_mention(tweet)
@@ -139,15 +123,6 @@ class ReplyingBot < Ebooks::Bot
       end
     end
   end
-
-  def on_favorite(user, tweet)
-    #don't do anything
-  end
-
-  def on_retweet(tweet)
-    #don't do anything
-  end
-
 
   #HELPERS
 

@@ -104,16 +104,6 @@ class Picbot < Ebooks::Bot
   
   #EVENTS - unused
 
-  # Reply to a DM
-  def on_message(dm)
-    #do nothing
-  end
-
-  # Follow a user back
-  def on_follow(user)
-    #do nothing
-  end
-
   # Reply to a mention
   def on_mention(tweet)
     #do nothing
@@ -122,13 +112,5 @@ class Picbot < Ebooks::Bot
   # Reply to a tweet in the bot's timeline
   def on_timeline(tweet)
     #do nothing
-  end
-
-  def on_favorite(user, tweet)
-    #don't do anything
-  end
-
-  def on_retweet(tweet)
-    #don't do anything
   end
 end
