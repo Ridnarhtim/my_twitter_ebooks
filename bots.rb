@@ -1,6 +1,7 @@
 require 'twitter_ebooks'
 require 'date'
 require 'date_easter'
+require 'time'
 
 #based on the bot example found at https://github.com/mispy/ebooks_example
 
@@ -365,6 +366,7 @@ end
 
 
 
+
 #A bot that posts pics
 class Picbot < Ebooks::Bot
   
@@ -377,10 +379,12 @@ class Picbot < Ebooks::Bot
   end
 
   def on_startup
-    # Tweet every half hour with a 75% chance
-    scheduler.cron '*/30 * * * *' do      
-      if rand < 0.8
-        tweet_a_picture()
+    # Tweet every half hour with a 80% chance
+    scheduler.cron '*/30 * * * *' do
+      if Time.now.between?(Time.parse("7:59"),Time.parse("8:01"))
+        tweet_a_picture("Good morning")
+      elsif rand < 0.8
+        tweet_a_picture("")
       else
         log "Not tweeting this time"
       end
@@ -422,7 +426,7 @@ class Picbot < Ebooks::Bot
   #HELPERS
 
   #Tweet out a picture
-  def tweet_a_picture
+  def tweet_a_picture(message)
     images = pick_image_folder
     begin
       retries ||= 0
@@ -431,8 +435,8 @@ class Picbot < Ebooks::Bot
         log "file #{pic} too large, trying another"
         pic = images.sample
       end
-      pixivurl = get_url(pic)
-      pictweet(pixivurl,pic)
+      text = get_text(message, pic)
+      pictweet(text,pic)
       return true
     rescue
       log "Couldn't tweet #{pic} for some reason"   
@@ -467,6 +471,11 @@ class Picbot < Ebooks::Bot
     base_path = ENV["LEWD_IMAGE_DIR"]
     images = Dir.glob(base_path + folder + "/**/*.{#{FILE_FORMATS}}")
     return images
+  end
+
+  def get_text(message, pic)
+    text = message + "\n" + get_url(pic)
+    return text
   end
 
   def get_url(pic)
