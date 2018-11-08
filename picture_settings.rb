@@ -27,7 +27,7 @@ end
 
 class PictureSettingsContainer
   
-  DEFAULT_SETTINGS = PictureSettings.new("","Bot", PictureSettings::DEFAULT_CHANCE)
+  DEFAULT_SETTINGS = PictureSettings.new("Bot","", PictureSettings::DEFAULT_CHANCE)
 
   attr_accessor :special_settings
         
