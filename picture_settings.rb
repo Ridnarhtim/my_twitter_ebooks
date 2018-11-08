@@ -51,7 +51,7 @@ class PictureSettingsContainer
     elsif(today.month == 11 && today.day == 7)
       @special_settings ||= PictureSettings.new("Seasonal/Navel", "It's #いいおなかの日!", 1)
       
-    elsif(today.month == 12 && today.day.between?(24,26))
+    elsif(today.month == 12 && today.day.between?(25,26))
       @special_settings ||= PictureSettings.new("Seasonal/Christmas", "Merry Christmas", 1)
     
     elsif(Time.now.between?(Time.parse("7:59"),Time.parse("8:01")))
