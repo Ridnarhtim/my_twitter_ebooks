@@ -378,74 +378,48 @@ class Picbot < Ebooks::Bot
     self.consumer_secret = ENV["PICBOT_CONSUMER_SECRET"] # Your app consumer secret
   end
 
+  #SCHEDULER
+
   def on_startup
-    # Tweet every half hour with a 80% chance
     scheduler.cron '*/30 * * * *' do
-      if Time.now.between?(Time.parse("7:59"),Time.parse("8:01"))
-        tweet_a_picture("Good morning")
-      elsif rand < 0.8
-        tweet_a_picture("")
-      else
-        log "Not tweeting this time"
-      end
+      tweet()
     end
   end
 
+  #TWEETING
 
-  #EVENTS
-
-  # Reply to a DM
-  def on_message(dm)
-    #do nothing
+  def tweet
+    pictures = select_picture_folder
+    if Time.now.between?(Time.parse("7:59"),Time.parse("8:01"))
+      tweet_a_picture(pictures, "Good morning")
+    else
+      tweet_a_picture_with_chance(pictures, "", 0.8)
+    end
   end
 
-  # Follow a user back
-  def on_follow(user)
-    #do nothing
+  def tweet_a_picture_with_chance(pictures, message, chance)
+    if rand<chance  
+      tweet_a_picture(pictures, message)
+    else
+      log "Not tweeting this time"
+    end
   end
 
-  # Reply to a mention
-  def on_mention(tweet)
-    #do nothing
-  end
-
-  # Reply to a tweet in the bot's timeline
-  def on_timeline(tweet)
-    #do nothing
-  end
-
-  def on_favorite(user, tweet)
-    #don't do anything
-  end
-
-  def on_retweet(tweet)
-    #don't do anything
-  end
-
-
-  #HELPERS
-
-  #Tweet out a picture
-  def tweet_a_picture(message)
-    images = pick_image_folder
+  def tweet_a_picture(pictures, message)
     begin
       retries ||= 0
-      pic = images.sample
-      while !verify_size(pic)
-        log "file #{pic} too large, trying another"
-        pic = images.sample
-      end
+      pic = select_a_picture(pictures)
       text = get_text(message, pic)
       pictweet(text,pic)
-      return true
     rescue
       log "Couldn't tweet #{pic} for some reason"   
       retry if (retries += 1) < 5
     end
-    return false
   end
-
-  def pick_image_folder
+    
+  #HELPERS
+      
+  def select_picture_folder
     today = Date.today
     easter = Date::easter(today.year)    
 
@@ -469,8 +443,17 @@ class Picbot < Ebooks::Bot
     end
 
     base_path = ENV["LEWD_IMAGE_DIR"]
-    images = Dir.glob(base_path + folder + "/**/*.{#{FILE_FORMATS}}")
-    return images
+    pictures = Dir.glob(base_path + folder + "/**/*.{#{FILE_FORMATS}}")
+    return pictures
+  end
+  
+  def select_a_picture(pictures)
+    pic = pictures.sample
+      while !verify_size(pic)
+        log "file #{pic} too large, trying another"
+        pic = pictures.sample
+      end
+    return pic
   end
 
   def get_text(message, pic)
@@ -515,6 +498,37 @@ class Picbot < Ebooks::Bot
     timestamp = "[" + Time.now.inspect + "] "
     STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
     STDOUT.flush
+  end
+  
+  
+  #EVENTS - unused
+
+  # Reply to a DM
+  def on_message(dm)
+    #do nothing
+  end
+
+  # Follow a user back
+  def on_follow(user)
+    #do nothing
+  end
+
+  # Reply to a mention
+  def on_mention(tweet)
+    #do nothing
+  end
+
+  # Reply to a tweet in the bot's timeline
+  def on_timeline(tweet)
+    #do nothing
+  end
+
+  def on_favorite(user, tweet)
+    #don't do anything
+  end
+
+  def on_retweet(tweet)
+    #don't do anything
   end
 end
 
