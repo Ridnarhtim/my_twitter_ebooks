@@ -1,6 +1,7 @@
 class PictureSettings
 
   FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
+  DEFAULT_CHANCE = 0.8
 
   attr_reader :picture_folder, :message, :chance
   
@@ -13,11 +14,16 @@ class PictureSettings
   def get_directory 
     return Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/" + @picture_folder + "/**/*.{#{FILE_FORMATS}}")
   end
+  
+  def reset
+    @message = ""
+    @chance = DEFAULT_CHANCE
+  end
 end
 
 class PictureSettingsContainer
   
-  DEFAULT_SETTINGS = PictureSettings.new("","Bot",0.8)
+  DEFAULT_SETTINGS = PictureSettings.new("","Bot", PictureSettings::DEFAULT_CHANCE)
 
   attr_accessor :special_settings
         
@@ -27,6 +33,9 @@ class PictureSettingsContainer
   end
   
   def update_special_settings
+  
+    @special_settings&.reset
+  
     today = Date.today
     easter = Date::easter(today.year)
 
