@@ -1,3 +1,42 @@
+class PictureSettingsContainer
+  
+  DEFAULT_SETTINGS = picture_settings.new("","Bot",0.8)
+
+  attr_accessor special_settings
+        
+  def get_picture_settings
+    update_special_settings
+    return @special_settings || DEFAULT_SETTINGS
+  end
+  
+  def update_special_settings
+    today = Date.today
+    easter = Date::easter(today.year)
+
+    if(today.month == 2 && today.day == 14)
+      @special_settings ||= picture_settings.new("Seasonal/ValentinesDay","Happy Valentine's Day", 1)
+
+    elsif(today.month == easter.month && today.day == easter.day)
+      @special_settings ||= picture_settings.new("Seasonal/Easter","Happy Easter", 1)
+
+    elsif(today.month == 10  && today.day == 31)
+      @special_settings ||= picture_settings.new("Seasonal/Halloween", "Happy Halloween", 1)
+
+    elsif(today.month == 11 && today.day == 7)
+      @special_settings ||= picture_settings.new("Seasonal/Navel", "It's #いいおなかの日!", 1)
+      
+    elsif(today.month == 12 && today.day.between?(24,26))
+      @special_settings ||= picture_settings.new("Seasonal/Christmas", "Merry Christmas", 1)
+    
+    elsif(Time.now.between?(Time.parse("7:59"),Time.parse("8:01")))
+      @special_settings ||= picture_settings.new("Seasonal/Morning", "Good morning", 1)
+
+    else
+      @special_settings = nil
+    end
+  end
+end
+
 class PictureSettings
 
   FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
