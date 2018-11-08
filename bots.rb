@@ -1,42 +1,9 @@
 require 'twitter_ebooks'
-require 'date'
-require 'date_easter'
-require 'time'
 require_relative 'picture_settings'
+require_relative 'bot_info'
+require_relative 'user_info'
 
 #based on the bot example found at https://github.com/mispy/ebooks_example
-
-# Information about a particular Twitter user we know
-class UserInfo
-  attr_reader :username
-
-  # @return [Integer] how many times we can pester this user unprompted
-  attr_accessor :pesters_left
-
-  # @param username [String]
-  def initialize(username)
-    @username = username
-    @pesters_left = 2
-  end
-end
-
-# Information about a particular Bot we know
-class BotInfo
-  MAX_REPLIES = 10
-  attr_accessor :replies_left
-
-  def initialize()
-    reset()
-  end
-
-  def reset()
-    @replies_left = MAX_REPLIES
-  end
-
-  def should_reply_to()
-    return rand<(@replies_left.to_f/MAX_REPLIES)
-  end
-end
 
 def top100; @top100 ||= model.keywords.take(100); end
 def top20;  @top20  ||= model.keywords.take(20); end
@@ -58,8 +25,8 @@ class ReplyingBot < Ebooks::Bot
 
     @userinfo = {}
     @botinfo = {
-      ENV["BOT_NAME_1"] => BotInfo.new(),
-      ENV["BOT_NAME_2"] => BotInfo.new()
+      ENV["BOT_NAME_1"] => BotInfo.new(ENV["BOT_NAME_1"]),
+      ENV["BOT_NAME_2"] => BotInfo.new(ENV["BOT_NAME_2"])
     }
   end
 

@@ -1,3 +1,7 @@
+require 'date_easter'
+require 'date'
+require 'time'
+
 class PictureSettings
 
   FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
