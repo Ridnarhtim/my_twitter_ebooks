@@ -22,7 +22,7 @@ class Picbot < Ebooks::Bot
   def on_startup
     scheduler.cron '*/30 * * * *' do
       sleep(5)
-      picture_settings = settings.get_picture_settings
+      picture_settings = @settings.get_picture_settings
       tweet_a_picture(picture_settings)
     end
   end
@@ -42,7 +42,7 @@ class Picbot < Ebooks::Bot
     begin
       retries ||= 0
       pic = select_a_picture(pictures)
-      text = get_text(picture_settings.message, pic)
+      text = get_text(picture_settings.get_message_if_new, pic)
       pictweet(text,pic)
     rescue
       log "Couldn't tweet #{pic} for some reason"   
@@ -125,7 +125,7 @@ class Picbot < Ebooks::Bot
       return false
     end
     
-    picture_settings = @settings.get_picture_settings
+    picture_settings = @settings.get_picture_settings(reset: false)
     pictures = picture_settings.get_directory
 
     begin
