@@ -10,7 +10,11 @@ class Picbot < Ebooks::Bot
   def configure
     self.consumer_key = ENV["PICBOT_CONSUMER_KEY"] # Your app consumer key
     self.consumer_secret = ENV["PICBOT_CONSUMER_SECRET"] # Your app consumer secret
+    
     @settings = PictureSettingsContainer.new()
+    
+    # Range in seconds to randomize delay when bot.delay is called
+    self.delay_range = 2..6
   end
 
   #SCHEDULER
@@ -100,13 +104,45 @@ class Picbot < Ebooks::Bot
     STDOUT.print timestamp + "@#{@username}: " + args.map(&:to_s).join(' ') + "\n"
     STDOUT.flush
   end
+    
+  #EVENTS
   
-  
-  #EVENTS - unused
-
-  # Reply to a mention
+  # Reply to a mention if it contains "gib lewd"
   def on_mention(tweet)
-    #do nothing
+    return unless (tweet.text =~ /gib lewd/i) != nil
+    delay do
+      reply_with_image(tweet)
+    end
+  end
+
+  #Reply with a picture
+  def reply_with_image(tweet, opts={})
+    opts = opts.clone
+    meta = meta(tweet)
+
+    if conversation(tweet).is_bot?(tweet.user.screen_name)
+      log "Not replying to suspected bot @#{tweet.user.screen_name}"
+      return false
+    end
+    
+    picture_settings = @settings.get_picture_settings
+    pictures = picture_settings.get_directory
+
+    begin
+      retries ||= 0
+      pic = select_a_picture(pictures)
+      log "Replying to @#{tweet.user.screen_name} with:  #{pic}"
+      
+      text = get_text(picture_settings.message, pic)
+      text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape tweet.user.screen_name}/i)
+      
+      tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: tweet.id))
+      conversation(tweet).add(tweet)
+      tweet
+      rescue
+        log "Couldn't reply with #{pic} for some reason"
+        retry if (retries += 1) < 5
+      end
   end
 
   # Reply to a tweet in the bot's timeline
