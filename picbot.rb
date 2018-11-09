@@ -4,14 +4,14 @@ require_relative 'picture_settings'
 #A bot that posts pics
 class Picbot < Ebooks::Bot 
 
-  attr_accessor :settings
+  attr_accessor :settings_container
 
   # Configuration here applies to all Picbots
   def configure
     self.consumer_key = ENV["PICBOT_CONSUMER_KEY"] # Your app consumer key
     self.consumer_secret = ENV["PICBOT_CONSUMER_SECRET"] # Your app consumer secret
     
-    @settings = PictureSettingsContainer.new()
+    @settings_container = PictureSettingsContainer.new()
     
     # Range in seconds to randomize delay when bot.delay is called
     self.delay_range = 2..6
@@ -21,8 +21,7 @@ class Picbot < Ebooks::Bot
 
   def on_startup
     scheduler.cron '*/30 * * * *' do
-      sleep(5)
-      picture_settings = @settings.get_picture_settings
+      picture_settings = @settings_container.get_updated_picture_settings
       tweet_a_picture(picture_settings)
     end
   end
@@ -30,7 +29,7 @@ class Picbot < Ebooks::Bot
   #TWEETING
 
   def tweet_a_picture(picture_settings)
-    if rand<picture_settings.chance  
+    if rand < picture_settings.get_chance
       tweet_a_picture_internal(picture_settings)
     else
       log "Not tweeting this time"
@@ -125,7 +124,7 @@ class Picbot < Ebooks::Bot
       return false
     end
     
-    picture_settings = @settings.get_picture_settings(reset: false)
+    picture_settings = @settings_container.picture_settings
     pictures = picture_settings.get_directory
 
     begin
@@ -133,7 +132,7 @@ class Picbot < Ebooks::Bot
       pic = select_a_picture(pictures)
       log "Replying to @#{tweet.user.screen_name} with:  #{pic}"
       
-      text = get_text(picture_settings.message, pic)
+      text = get_text(picture_settings.get_message, pic)
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape tweet.user.screen_name}/i)
       
       tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: tweet.id))
