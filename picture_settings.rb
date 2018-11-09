@@ -1,19 +1,9 @@
 require 'date_easter'
 require 'date'
 require 'time'
+require_relative 'seasons'
 
 DEFAULT_CHANCE = 0.8
-Season = Struct.new(:folder, :message, :initial_chance)
-SEASONS = {
-      "ValentinesDay" => Season.new("Seasonal/ValentinesDay","Happy Valentine's Day",1),
-      "Easter" => Season.new("Seasonal/Easter","Happy Easter",1),
-      "Halloween" => Season.new("Seasonal/Halloween","Happy Halloween",1),
-      "Navel" => Season.new("Seasonal/Navel","Happy #いいおなかの日!",1),
-      "ChristmasEve" => Season.new("Seasonal/Christmas","It's almost Christmas",1),
-      "Christmas" => Season.new("Seasonal/Christmas","Merry Christmas",1),
-      "Morning" => Season.new("Seasonal/Morning","Good morning",1),
-      "Default" => Season.new("Bot","",DEFAULT_CHANCE)
-    }
 
 class PictureSettings
 
@@ -30,20 +20,24 @@ class PictureSettings
     end
   end
   
+  def reset_season
+    @new_season = true
+  end
+  
   def get_directory 
-    return Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/" + SEASONS[@current_season].folder + "/**/*.{#{FILE_FORMATS}}")
+    return Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/" + Season.get(@current_season).folder + "/**/*.{#{FILE_FORMATS}}")
   end
   
   def get_chance
-    @new_season ? SEASONS[@current_season].initial_chance : DEFAULT_CHANCE
+    @new_season ? Season.get(@current_season).initial_chance : DEFAULT_CHANCE
   end
   
-  def get_message
-    SEASONS[@current_season].message
+  def get_reply_message
+    Season.get(@current_season).message
   end
    
-  def get_message_if_new
-    @new_season ? SEASONS[@current_season].message : ""
+  def get_tweet_message
+    @new_season ? Season.get(@current_season).message : ""
   end
 end
 
@@ -58,34 +52,50 @@ class PictureSettingsContainer
   def get_updated_picture_settings
     update_season
     return @picture_settings
-  end
+  end 
   
   def update_season
-  
-    today = Date.today
+
     now = Time.now
+    today = Date.today
     easter = Date::easter(today.year)
 
-    if(today.month == 2 && today.day == 14)
+    #Special days
+    if today.month == 2 && today.day == 14
       @picture_settings.update_season("ValentinesDay")
 
-    elsif(today.month == easter.month && today.day == easter.day)
+    elsif today.month == easter.month && today.day == easter.day
       @picture_settings.update_season("Easter")
 
-    elsif(today.month == 10  && today.day == 31)
+    elsif today.month == 10  && today.day == 31
       @picture_settings.update_season("Halloween")
 
-    elsif(today.month == 11 && today.day == 7)
+    elsif today.month == 11 && today.day == 7
       @picture_settings.update_season("Navel")
-    
-    elsif(today.month == 12 && today.day.between?(25,26))
+
+    #Christmas
+    elsif today.month == 12 && today.day.between?(25,26)
       @picture_settings.update_season("Christmas")
-    
-    elsif(now.between?(Time.parse("8:00"),Time.parse("8:01")))
+
+    elsif today.month == 12 && today.day == 24 && now >= Time.parse("8:00")
+      @picture_settings.update_season("ChristmasEve")
+
+    elsif today.month == 12 && today.day.between?(1,23) && it_is_morning
+      @picture_settings.update_season("ChristmasCountdownMessage")
+
+    elsif now.between?(Time.new(today.year,12,1,8,0,0),Time.new(today.year,12,24,8,00,00))
+      @picture_settings.update_season("ChristmasCountdownImages")
+
+    #Daily
+    elsif it_is_morning
       @picture_settings.update_season("Morning")
 
     else
       @picture_settings.update_season("Default")
     end
+  end
+
+  def it_is_morning
+    now = Time.now.between?(Time.parse("8:00"),Time.parse("8:01"))
   end
 end

@@ -21,6 +21,7 @@ class Picbot < Ebooks::Bot
 
   def on_startup
     scheduler.cron '*/30 * * * *' do
+      sleep(1)
       picture_settings = @settings_container.get_updated_picture_settings
       tweet_a_picture(picture_settings)
     end
@@ -41,7 +42,7 @@ class Picbot < Ebooks::Bot
     begin
       retries ||= 0
       pic = select_a_picture(pictures)
-      text = get_text(picture_settings.get_message_if_new, pic)
+      text = get_text(picture_settings.get_tweet_message, pic)
       pictweet(text,pic)
     rescue
       log "Couldn't tweet #{pic} for some reason"   
@@ -132,7 +133,7 @@ class Picbot < Ebooks::Bot
       pic = select_a_picture(pictures)
       log "Replying to @#{tweet.user.screen_name} with:  #{pic}"
       
-      text = get_text(picture_settings.get_message, pic)
+      text = get_text(picture_settings.get_reply_message, pic)
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape tweet.user.screen_name}/i)
       
       tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: tweet.id))
