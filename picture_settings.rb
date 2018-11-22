@@ -9,7 +9,11 @@ class PictureSettings
 
   FILE_FORMATS = "{jpg,png,jpeg,gif,mp4}"
 
-  attr_accessor :current_season, :new_season
+  attr_accessor :seasons, :current_season, :new_season
+  
+  def initialize
+    @seasons = Seasons.new
+  end
   
   def update_season(season)
     if @current_season == season
@@ -25,19 +29,20 @@ class PictureSettings
   end
   
   def get_directory 
-    return Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/" + Season.get(@current_season).folder + "/**/*.{#{FILE_FORMATS}}")
+    return Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/" + @seasons.get(@current_season).folder + "/**/*.{#{FILE_FORMATS}}")
   end
   
   def get_chance
-    @new_season ? Season.get(@current_season).initial_chance : DEFAULT_CHANCE
+    @new_season ? @seasons.get(@current_season).initial_chance : DEFAULT_CHANCE
   end
   
   def get_reply_message
-    Season.get(@current_season).message
+    season_details = @seasons.get(@current_season)
+    season_details.include_in_replies ? season_details.get(@current_season).message : ""
   end
    
   def get_tweet_message
-    @new_season ? Season.get(@current_season).message : ""
+    @new_season ? @seasons.get(@current_season).message : ""
   end
 end
 
