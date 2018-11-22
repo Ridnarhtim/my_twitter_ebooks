@@ -1,10 +1,13 @@
 require 'twitter_ebooks'
+require 'json'
 require_relative 'picture_settings'
 
 #A bot that posts pics
 class Picbot < Ebooks::Bot 
 
-  attr_accessor :settings_container
+  REPEAT_CYCLE_LENGTH = 1500
+  
+  attr_accessor :settings_container, :recently_tweeted
 
   # Configuration here applies to all Picbots
   def configure
@@ -12,6 +15,8 @@ class Picbot < Ebooks::Bot
     self.consumer_secret = ENV["PICBOT_CONSUMER_SECRET"] # Your app consumer secret
     
     @settings_container = PictureSettingsContainer.new()
+    buffer = File.open(ENV["PICBOT_NAME"] + '_tweeted_pics.json', 'r').read
+    @recently_tweeted = JSON.parse(buffer)
     
     # Range in seconds to randomize delay when bot.delay is called
     self.delay_range = 2..6
@@ -44,21 +49,36 @@ class Picbot < Ebooks::Bot
       pic = select_a_picture(pictures)
       text = get_text(picture_settings.get_tweet_message, pic)
       pictweet(text,pic)
-    rescue
-      log "Couldn't tweet #{pic} for some reason"   
+    rescue => exception
       retry if (retries += 1) < 5
+      puts exception
     end
   end
   
   #HELPERS
   
   def select_a_picture(pictures)
-    pic = pictures.sample
-      while !verify_size(pic)
-        log "file #{pic} too large, trying another"
-        pic = pictures.sample
-      end
+    pic = nil
+    loop do
+      pic = pictures.sample
+      if !verify_size(pic) then log "Not tweeting #{pic}: too large" else break end
+      if was_recently_tweeted(pic) then log "Not tweeting #{pic}: recently tweeted" else break end
+    end
+    
+    if @recently_tweeted.size > REPEAT_CYCLE_LENGTH
+      @recently_tweeted.drop(1)
+    end
+    
+    @recently_tweeted.push(pic)
+    File.open(ENV["PICBOT_NAME"] + "_tweeted_pics.json","w+") do |f|
+      f.write(@recently_tweeted.to_json)
+    end
+    
     return pic
+  end
+
+  def was_recently_tweeted(pic)
+    @recently_tweeted.include? pic
   end
 
   def get_text(message, pic)
