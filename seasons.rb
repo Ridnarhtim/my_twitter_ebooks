@@ -16,10 +16,14 @@ class Seasons
       "ChristmasCountdownImages" => SeasonStruct.new(christmas_folder_chance,"",0.8,true),
       "ChristmasEver" => SeasonStruct.new("Seasonal/Christmas","It's Almost Christmas!",1,false),
       "Christmas" => SeasonStruct.new("Seasonal/Christmas","Merry Christmas",1,true),
-      "Morning" => SeasonStruct.new("Seasonal/Morning","Good morning degenerates",1,true),
+      "Morning" => SeasonStruct.new("Seasonal/Morning",morning_message,1,true),
       "Default" => SeasonStruct.new("Bot","",0.8,false)
     }
   end
+  
+  def morning_message
+    rand < 0.05 ? "Good morning degenerates" : "Good morning"
+  end  
 
   def get(season_name)
     @seasons[season_name]
