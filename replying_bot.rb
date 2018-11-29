@@ -180,7 +180,7 @@ class ReplyingBot < Ebooks::Bot
         return false
       end
 
-      text = ""
+      text = rand < 0.05 ? "me irl" : ""
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape ev.user.screen_name}/i)
 
       images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
