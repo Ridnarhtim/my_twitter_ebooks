@@ -180,7 +180,7 @@ class ReplyingBot < Ebooks::Bot
         return false
       end
 
-      text = rand < 0.05 ? "me irl" : ""
+      text = ""
       text = meta.reply_prefix + text unless text.match(/@#{Regexp.escape ev.user.screen_name}/i)
 
       images = Dir.glob(ENV["REACTION_IMAGE_DIR"] + "/**/*.{#{FILE_FORMATS}}")
@@ -219,7 +219,8 @@ class ReplyingBot < Ebooks::Bot
         log "file #{pic} too large, trying another"
         pic = images.sample
       end
-      pictweet("",pic)
+      text = rand < 0.05 ? "me irl" : ""
+      pictweet(text,pic)
       return true
     rescue
       log "Couldn't tweet #{pic} for some reason"   
