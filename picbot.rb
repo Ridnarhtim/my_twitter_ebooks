@@ -43,7 +43,7 @@ class Picbot < Ebooks::Bot
   end
 
   def tweet_a_picture_internal(picture_settings)
-    pictures = picture_settings.get_directory  
+    pictures = picture_settings.get_directory
     begin
       retries ||= 0
       pic = select_a_picture(pictures)
@@ -59,10 +59,23 @@ class Picbot < Ebooks::Bot
   
   def select_a_picture(pictures)
     pic = nil
+    
+    #check if anything in New directory that hasn't been tweeted yet
+    newpics = pictures.select {|pic| (pic.include? "/New/") && !(@recently_tweeted.include?(pic))}
+    
+    if(newpics.any?)
+      pictures = newpics
+    end
+    
     loop do
       pic = pictures.sample
-      if !verify_size(pic) then log "Not tweeting #{pic}: too large" else break end
-      if was_recently_tweeted(pic) then log "Not tweeting #{pic}: recently tweeted" else break end
+      if !verify_size(pic)
+        log "Not tweeting #{pic}: too large"
+      elsif was_recently_tweeted(pic)
+        log "Not tweeting #{pic}: recently tweeted"
+      else
+        break
+      end
     end
     
     if @recently_tweeted.size > REPEAT_CYCLE_LENGTH
@@ -70,7 +83,7 @@ class Picbot < Ebooks::Bot
     end
     
     @recently_tweeted.push(pic)
-    File.open(ENV["PICBOT_NAME"] + "_tweeted_pics.json","w+") do |f|
+    File.open(ENV["PICBOT_NAME"] + "_tweeted_pics.json","w") do |f|
       f.write(@recently_tweeted.to_json)
     end
     
