@@ -1,4 +1,4 @@
-sudo /usr/local/bin/rclone -v sync remote:Reactions /home/pi/Pictures/Reactions --config /home/pi/.config/rclone/rclone.conf
-sudo /usr/local/bin/rclone -v sync remote:Random/BotFriendly /home/pi/Pictures/Random --config /home/pi/.config/rclone/rclone.conf
-sudo /usr/local/bin/rclone -v sync remote:2D/Bot /home/pi/Pictures/2D/Bot --config /home/pi/.config/rclone/rclone.conf
-sudo /usr/local/bin/rclone -v sync remote:2D/Seasonal /home/pi/Pictures/2D/Seasonal --config /home/pi/.config/rclone/rclone.conf
+/usr/local/bin/rclone -v sync remote:Reactions /home/pi/Pictures/Reactions --config /home/pi/.config/rclone/rclone.conf
+/usr/local/bin/rclone -v sync remote:Random/BotFriendly /home/pi/Pictures/Random --config /home/pi/.config/rclone/rclone.conf
+/usr/local/bin/rclone -v sync remote:2D/Bot /home/pi/Pictures/2D/Bot --config /home/pi/.config/rclone/rclone.conf
+/usr/local/bin/rclone -v sync remote:2D/Seasonal /home/pi/Pictures/2D/Seasonal --config /home/pi/.config/rclone/rclone.conf
