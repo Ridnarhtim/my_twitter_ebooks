@@ -1,6 +1,7 @@
 require 'twitter_ebooks'
 require 'json'
 require_relative 'picture_settings'
+require_relative 'image_resizer'
 
 #A bot that posts pics
 class Picbot < Ebooks::Bot 
@@ -70,21 +71,29 @@ class Picbot < Ebooks::Bot
     loop do
       pic = pictures.sample
       if !verify_size(pic)
-        log "Not tweeting #{pic}: too large"
+        #try to resize image
+        if ImageResizer.resize(pic)
+          pic = ImageResizer::OUTPUT_FILE
+          log "image resized: " + pic
+          break
+        else
+          log "Not tweeting #{pic}: too large"
+        end
+
       elsif was_recently_tweeted(pic)
         log "Not tweeting #{pic}: recently tweeted"
+
       else
+        @recently_tweeted.push(pic)
+        File.open(ENV["PICBOT_NAME"] + "_tweeted_pics.json","w") do |f|
+          f.write(@recently_tweeted.to_json)
+        end
         break
       end
     end
     
     if @recently_tweeted.size > REPEAT_CYCLE_LENGTH
       @recently_tweeted.drop(1)
-    end
-    
-    @recently_tweeted.push(pic)
-    File.open(ENV["PICBOT_NAME"] + "_tweeted_pics.json","w") do |f|
-      f.write(@recently_tweeted.to_json)
     end
     
     return pic
@@ -172,10 +181,10 @@ class Picbot < Ebooks::Bot
       tweet = twitter.update_with_media(text, File.new(pic), opts.merge(in_reply_to_status_id: tweet.id))
       conversation(tweet).add(tweet)
       tweet
-      rescue
-        log "Couldn't reply with #{pic} for some reason"
-        retry if (retries += 1) < 5
-      end
+    rescue
+      log "Couldn't reply with #{pic} for some reason"
+      retry if (retries += 1) < 5
+    end
   end
 
   # Reply to a tweet in the bot's timeline
