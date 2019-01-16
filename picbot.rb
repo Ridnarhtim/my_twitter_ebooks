@@ -45,6 +45,7 @@ class Picbot < Ebooks::Bot
 
   def tweet_a_picture_internal(picture_settings)
     pictures = picture_settings.get_directory
+    pic = nil
     begin
       retries ||= 0
       pic = select_a_picture(pictures)
@@ -54,7 +55,14 @@ class Picbot < Ebooks::Bot
       retry if (retries += 1) < 5
       puts exception
     end
+    
+    #delete file if it was resized
+    if pic.include? "-resized"
+      File.delete(pic)
+    end
   end
+  
+
   
   #HELPERS
   
@@ -70,30 +78,32 @@ class Picbot < Ebooks::Bot
     
     loop do
       pic = pictures.sample
-      if !verify_size(pic)
+      if was_recently_tweeted(pic)
+        log "Not tweeting #{pic}: recently tweeted"
+
+      elsif !verify_size(pic)
         #try to resize image
-        if ImageResizer.resize(pic)
-          pic = ImageResizer::OUTPUT_FILE
+        if resized = ImageResizer.resize(pic)
           log "image resized: " + pic
+          @recently_tweeted.push(pic)
+          pic = resized
           break
         else
           log "Not tweeting #{pic}: too large"
         end
-
-      elsif was_recently_tweeted(pic)
-        log "Not tweeting #{pic}: recently tweeted"
-
+      
       else
         @recently_tweeted.push(pic)
-        File.open(ENV["PICBOT_NAME"] + "_tweeted_pics.json","w") do |f|
-          f.write(@recently_tweeted.to_json)
-        end
         break
       end
     end
     
     if @recently_tweeted.size > REPEAT_CYCLE_LENGTH
       @recently_tweeted.drop(1)
+    end
+    
+    File.open(ENV["PICBOT_NAME"] + "_tweeted_pics.json","w") do |f|
+      f.write(@recently_tweeted.to_json)
     end
     
     return pic
