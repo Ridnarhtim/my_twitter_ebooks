@@ -137,7 +137,7 @@ class Picbot < Ebooks::Bot
   def get_danbooru_url(pic)
     danbooru_id = pic.split('_').last.split('.').first
     return "" unless danbooru_id.length <= 8 && danbooru_id.scan(/\D/).empty?
-    return "http://www.danbooru.donmai.us/posts/" + danbooru_id
+    return "http://danbooru.donmai.us/posts/" + danbooru_id
   end
 
   #Verify that the selected picture is small enough to upload to Twitter
