@@ -76,10 +76,14 @@ class Picbot < Ebooks::Bot
       pictures = newpics
     end
     
+    #In order to avoid infinite loops in small folders, only try up to 10 times to find a new picture
+    recently_tweeted_counter = 0;
+    
     loop do
       pic = pictures.sample
-      if was_recently_tweeted(pic)
+      if was_recently_tweeted(pic) && recently_tweeted_counter < 10
         log "Not tweeting #{pic}: recently tweeted"
+        recently_tweeted_counter += 1
 
       elsif !verify_size(pic)
         #try to resize image
