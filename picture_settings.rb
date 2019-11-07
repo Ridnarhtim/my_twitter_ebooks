@@ -3,7 +3,7 @@ require 'date'
 require 'time'
 require_relative 'seasons'
 
-DEFAULT_CHANCE = 0.8
+DEFAULT_CHANCE = 1
 
 class PictureSettings
 
@@ -28,7 +28,7 @@ class PictureSettings
     @new_season = true
   end
   
-  def get_directory 
+  def get_directory
     return Dir.glob(ENV["LEWD_IMAGE_DIR"] + "/" + @seasons.get(@current_season).folder + "/**/*.{#{FILE_FORMATS}}")
   end
   
@@ -77,6 +77,9 @@ class PictureSettingsContainer
 
     elsif today.month == 11 && today.day == 7
       @picture_settings.update_season("Navel")
+      
+    elsif today.month == 11 && today.day == 30
+      @picture_settings.update_season("Ass")
 
     #Christmas
     elsif today.month == 12 && today.day.between?(25,26)

@@ -20,7 +20,7 @@ class Picbot < Ebooks::Bot
     @recently_tweeted = JSON.parse(buffer)
     
     # Range in seconds to randomize delay when bot.delay is called
-    self.delay_range = 2..6
+    self.delay_range = 2..4
   end
 
   #SCHEDULER
@@ -127,6 +127,8 @@ class Picbot < Ebooks::Bot
       return get_pixiv_url(pic) 
     elsif pic.include? "Danbooru"
       return get_danbooru_url(pic) 
+    elsif pic.include? "DeviantArt"
+      return get_deviantart_url(pic)
     else
       return ""
     end
@@ -142,6 +144,15 @@ class Picbot < Ebooks::Bot
     danbooru_id = pic.split('_').last.split('.').first
     return "" unless danbooru_id.length <= 8 && danbooru_id.scan(/\D/).empty?
     return "http://danbooru.donmai.us/posts/" + danbooru_id
+  end
+
+  def get_deviantart_url(pic)
+    #/folders/pics/DeviantArt/artist_picture.extension
+    fragments = pic.split('/').last.split('.').first.split('_')
+    return "" unless fragments.length == 2
+    artist = fragments.first
+    id = fragments[1]
+    return "https://www.deviantart.com/" + artist + "/art/" + id
   end
 
   #Verify that the selected picture is small enough to upload to Twitter

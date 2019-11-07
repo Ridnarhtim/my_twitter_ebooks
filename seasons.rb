@@ -13,7 +13,9 @@ class Seasons
     when "Halloween"
       SeasonStruct.new("Seasonal/Halloween","Happy Halloween",1,true)
     when "Navel"
-      SeasonStruct.new("Seasonal/Navel","Happy #いいおなかの日",1,true)
+      SeasonStruct.new("Bot/Navel","It's #いいおなかの日 - Nice bellies all day!",1,true)
+    when "Ass"
+      SeasonStruct.new("Bot/Ass","It's #いいおしりの日 - ass pics all day!",1,true)
     when "ChristmasCountdownMessage"
       SeasonStruct.new("Seasonal/Christmas",christmas_timer_message,1,false)
     when "ChristmasCountdownImages"
