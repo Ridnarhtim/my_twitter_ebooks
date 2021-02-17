@@ -75,12 +75,16 @@ class PictureSettingsContainer
     elsif today.month == 10  && today.day == 31
       @picture_settings.update_season("Halloween")
 
-    elsif today.month == 11 && today.day == 7
-      @picture_settings.update_season("Navel")
-      
-    elsif today.month == 11 && today.day == 30
+    #Japanese lewd days
+    elsif today.month == 11 && (today.day == 4 || today.day == 30)
       @picture_settings.update_season("Ass")
 
+    elsif today.month == 11 && today.day == 7
+      @picture_settings.update_season("Navel")
+
+    elsif today.month == 11 && today.day == 8
+      @picture_settings.update_season("Tits")
+      
     #Christmas
     elsif today.month == 12 && today.day.between?(25,26)
       @picture_settings.update_season("Christmas")

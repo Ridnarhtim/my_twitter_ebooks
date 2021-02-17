@@ -12,14 +12,16 @@ class Seasons
       SeasonStruct.new("Seasonal/Easter","Happy Easter",1,true)
     when "Halloween"
       SeasonStruct.new("Seasonal/Halloween","Happy Halloween",1,true)
-    when "Navel"
-      SeasonStruct.new("Bot/Navel","It's #いいおなかの日 - Nice bellies all day!",1,true)
     when "Ass"
-      SeasonStruct.new("Bot/Ass","It's #いいおしりの日 - ass pics all day!",1,true)
+      SeasonStruct.new("Bot/Ass","It's #いいおしりの日 - Ass pics all day!",1,true)
+    when "Navel"
+      SeasonStruct.new("Bot/Navel","It's #いいおなかの日 - Nice tummies all day!",1,true)
+    when "Tits"
+      SeasonStruct.new("Bot/Tits","It's #いいおっぱいの日 - Titty pics all day!",1,true)
     when "ChristmasCountdownMessage"
       SeasonStruct.new("Seasonal/Christmas",christmas_timer_message,1,false)
     when "ChristmasCountdownImages"
-      SeasonStruct.new(christmas_folder_chance,"",0.8,true)
+      SeasonStruct.new(christmas_folder_chance,"",1,true)
     when "ChristmasEve"
       SeasonStruct.new("Seasonal/Christmas","It's Almost Christmas!",1,false)
     when "Christmas"
@@ -27,7 +29,7 @@ class Seasons
     when "Morning"
       SeasonStruct.new("Seasonal/Morning",morning_message,1,true)
     when "Default"
-      SeasonStruct.new("Bot","",0.8,false)
+      SeasonStruct.new("Bot","",1,false)
     end
   end 
 
@@ -36,7 +38,7 @@ class Seasons
   end  
 
   def days_to_christmas
-    (Date.parse("2018-12-25") - Date.today).to_i
+    (Date.new(Date.today.year,12,25) - Date.today).to_i
   end
 
   def christmas_timer_message

@@ -1,5 +1,6 @@
 require 'twitter_ebooks'
 require 'json'
+require 'time'
 require_relative 'picture_settings'
 require_relative 'image_resizer'
 
